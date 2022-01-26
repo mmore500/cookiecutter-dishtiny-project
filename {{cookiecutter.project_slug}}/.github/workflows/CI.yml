@@ -9,199 +9,245 @@ on:
     - cron: '0 0 * * 0'
 jobs:
 
-  clang-debug:
-    name: Unit Tests (clang, debug mode)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: clang++
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN -e "CXX=${CXX}" -i {{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "set -x && cd /opt/{{ cookiecutter.project_slug }}/tests && make"
+          fetch-depth: 0 # fetch all history for all branches and tags
+      - name: Push to GitHub Container Registry
+        uses: docker/build-push-action@v1
+        with:
+          push: true
+          tags: "GITHUB_ACTION_${{ '{{ github.run_number }}' }}"
+          username: ${{ '{{ github.actor }}' }}
+          password: ${{ '{{ secrets.GITHUB_TOKEN }}' }}
+          repository: {{cookiecutter.github_username}}/{{cookiecutter.project_slug}}
+          registry: ghcr.io
+          add_git_labels: true
 
-
-  gcc-debug:
-    name: Unit Tests (gcc, debug mode)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: g++
+  docker-teximage-build:
+    name: Docker Tex Image Build
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN -e "CXX=${CXX}" -i {{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "set -x && cd /opt/{{ cookiecutter.project_slug }}/tests && make"
-
-
-  clang-fulldebug:
-    name: Unit Tests (clang, full debug mode)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: clang++
-    steps:
-      - uses: actions/checkout@v2
+          fetch-depth: 0 # fetch all history for all branches and tags
+      - name: Build and Push to GitHub Container Registry
+        uses: docker/build-push-action@v1
         with:
-          submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN -e "CXX=${CXX}" -i {{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "set -x && cd /opt/{{ cookiecutter.project_slug }}/tests && make fulldebug"
+          push: true
+          tags: "GITHUB_ACTION_${{ '{{ github.run_number }}' }}_TEXIMAGE"
+          username: ${{ '{{ github.actor }}' }}
+          password: ${{ '{{ secrets.GITHUB_TOKEN }}' }}
+          repository: {{cookiecutter.github_username}}/{{cookiecutter.project_slug}}
+          registry: ghcr.io
+          path: ./tex/
+          add_git_labels: true
 
-  gcc-fulldebug:
-    name: Unit Tests (gcc, full debug mode)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: g++
+  tidy:
+    name: Tidy
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-build
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      # github actions requires root to access mounted volumes
+      options: --user root
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN -e "CXX=${CXX}" -i {{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "set -x && cd /opt/{{ cookiecutter.project_slug }}/tests && make fulldebug"
+      - run: |
+          cd /opt/{{ cookiecutter.project_slug }}
+          ./tidy/test_tidy.sh
 
-
-  clang-opt:
-    name: Unit Tests (clang, opt mode)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: clang++
+  py-unit:
+    name: Pylib Unit Tests
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-build
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      # github actions requires root to access mounted volumes
+      options: --user root --cap-add=SYS_ADMIN
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN -e "CXX=${CXX}" -i {{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "set -x && cd /opt/{{ cookiecutter.project_slug }}/tests && make opt"
+      - run: /opt/{{cookiecutter.project_slug}}/pylib/test/run_tests.sh
 
-  gcc-opt:
-    name: Unit Tests (gcc, opt mode)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: g++
+  cpp-unit:
+    name: C++ Unit Tests
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-build
+    strategy:
+      matrix:
+        cxx: [clang++, g++]
+        mode: [ "", opt]
+      fail-fast: false
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      # github actions requires root to access mounted volumes
+      options: --user root --cap-add=SYS_ADMIN
+      env:
+        DISH_MPICXX: mpicxx.openmpi
+        OMPI_CXX: clang++
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN -e "CXX=${CXX}" -i {{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "set -x && cd /opt/{{ cookiecutter.project_slug }}/tests && make opt"
+      - run: |
+          set -x
+          make ${{ '{{matrix.mode}}' }} -C "/opt/{{cookiecutter.project_slug}}/cpp/tests/"
 
-  coverage:
+  cpp-coverage:
     name: Coverage
-    runs-on: ubuntu-16.04
-    env:
-      CXX: clang++
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-build
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      # github actions requires root to access mounted volumes
+      options: --user root --cap-add=SYS_ADMIN
+      env:
+        CXX: clang++
     steps:
-      - uses: actions/checkout@v2
+      - run: "make coverage -C /opt/{{cookiecutter.project_slug}}/cpp/tests/"
+      - uses: codecov/codecov-action@v1
         with:
-          submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: ci_env=`bash <(curl -s https://codecov.io/env)`
-      - run: docker run $ci_env -e "CXX=${CXX}" {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "cd /opt/{{ cookiecutter.project_slug }} && make coverage && bash <(curl -s https://codecov.io/bash)"
+          token: ${{ '{{ secrets.CODECOV_TOKEN }}' }} # not required for public repos
+          fail_ci_if_error: true
+          verbose: true
+          directory: /opt/{{cookiecutter.project_slug}}/cpp
 
   docs:
     name: Docs
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-build
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      # github actions requires root to access mounted volumes
+      options: --user root
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run --cap-add=SYS_ADMIN -i {{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "set -x && cd /opt/{{ cookiecutter.project_slug }}/tests && make"
+      - run: make html -C /opt/{{cookiecutter.project_slug}}/docs
 
-  source-clang:
-    name: Source (clang)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: clang++
+  cpp-source:
+    name: Source
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-build
+    strategy:
+      matrix:
+        cxx: [clang++, g++]
+        mode: [ "", opt]
+      fail-fast: false
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      options: --user user --cap-add=SYS_ADMIN
+      env:
+        DISH_MPICXX: mpicxx.openmpi
+        OMPI_CXX: ${{ '{{ matrix.cxx }}' }}
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "cd /opt/{{ cookiecutter.project_slug }} && make test"
+      # undo github actions override of HOME to "/home/github/"
+      - run: |
+          export HOME="/home/user/"
+          set -x
+          make test -C /opt/{{cookiecutter.project_slug}}/
 
-  source-gcc:
-    name: Source (gcc)
-    runs-on: ubuntu-16.04
-    env:
-      CXX: g++
+  binder:
+    name: Notebooks
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-build
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      # github actions requires root to access mounted volumes
+      options: --user root
+    steps:
+      # Adapted from https://askubuntu.com/a/524368
+      - run: cd /opt/{{cookiecutter.project_slug}}/binder && ./execute_notebooks.sh
+      - run: git init
+      - uses: fregante/setup-git-user@v1
+      - run: git commit --allow-empty -m "Initial commit"
+      - run: cp -r /opt/{{cookiecutter.project_slug}}/ deploy/
+      - uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: binder # The branch the action should deploy to.
+          folder: deploy # The folder the action should deploy.
+
+  latex:
+    name: Latex Build
+    runs-on: ubuntu-20.04
+    needs:
+      - docker-teximage-build
+    container:
+      image: ghcr.io/{{cookiecutter.github_username}}/{{cookiecutter.project_slug}}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}_TEXIMAGE
+      # github actions requires root to access mounted volumes
+      options: --user root
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker ps -a
-      - run: docker run -e "CXX=${CXX}" --cap-add=SYS_ADMIN {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "cd /opt/{{ cookiecutter.project_slug }} && make test"
+      - run: make -C /opt/{{ cookiecutter.project_slug }}/tex
+      - name: Upload output as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: manuscript
+          path: /opt/{{ cookiecutter.project_slug }}/tex/{{ cookiecutter.project_slug }}-draft.pdf
 
   deploy-pages:
     name: Deploy to GitHub Pages
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/cut-cookie'
     needs:
-      - clang-debug
-      - gcc-debug
-      - clang-fulldebug
-      - gcc-fulldebug
-      - clang-opt
-      - gcc-opt
-      - coverage
-      - source-gcc
-      - source-clang
-    env:
-      GH_TOKEN: ${{ '{{' }} secrets.GITHUB_TOKEN {{ '}}' }}
+      - binder
+      - cpp-coverage
+      - cpp-source
+      - cpp-unit
+      - docs
+      - latex
+      - py-unit
+      - tidy
+    container:
+      image: ghcr.io/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}:GITHUB_ACTION_${{ '{{ github.run_number }}' }}
+      # github actions requires root to access mounted volumes
+      options: --user root
+    steps:
+      - run: git init
+      - uses: fregante/setup-git-user@v1
+      - run: git commit --allow-empty -m "Initial commit"
+      - run: make web -C /opt/{{ cookiecutter.project_slug }}/
+      - run: make badges -C /opt/{{ cookiecutter.project_slug }}/
+      - run: cp -r /opt/{{ cookiecutter.project_slug }}/cpp/web/ deploy/
+      - uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: deploy # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch
+
+  deploy-container:
+    name: Deploy Container to ghcr.io
+    runs-on: ubuntu-20.04
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/cut-cookie'
+    needs:
+      - binder
+      - cpp-coverage
+      - cpp-source
+      - cpp-unit
+      - docs
+      - latex
+      - py-unit
+      - tidy
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      - run: docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-      - run: docker run -e "GH_TOKEN=${GH_TOKEN}" -e "GITHUB_RUN_NUMBER=${GITHUB_RUN_NUMBER}" -e "GITHUB_ACTOR=${GITHUB_ACTOR}" -e "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}" {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} /bin/bash -c "cd /opt/{{ cookiecutter.project_slug }} && source third-party/emsdk/emsdk_env.sh && make web && make badges && ./ci/deploy_gh_pages.sh"
-
-  # - name: DockerHub
-  #   if: (type = push AND branch IN ({{ cookiecutter.deployment_branch }}))
-  #   install:
-  #   - docker build -t {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }} .
-  #   - docker ps -a
-  #   script:
-  #   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  #   - docker push {{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }}
+          fetch-depth: 0 # fetch all history for all branches and tags
+      - name: Push to DockerHub
+        uses: docker/build-push-action@v1
+        with:
+          push: true
+          username: ${{ '{{ github.actor }}' }}
+          password: ${{ '{{ secrets.GITHUB_TOKEN }}' }}
+          repository: {{cookiecutter.github_username}}/{{cookiecutter.project_slug}}
+          registry: ghcr.io
+          tag_with_ref: true
+          tag_with_sha: true
+          add_git_labels: true

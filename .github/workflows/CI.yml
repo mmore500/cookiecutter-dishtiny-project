@@ -11,18 +11,25 @@ jobs:
 
   make-and-test-cookie:
     name: Cookie Instantiation Tests
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      # Adapted from https://askubuntu.com/a/524368
-      - run: echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo -h 127.0.0.1 tee -a /etc/hosts
-      - uses: docker-practice/actions-setup-docker@v1
-      # Adapted from https://stackoverflow.com/a/28123384
-      # RE: puppeteer in Docker,
-      # see https://github.com/puppeteer/puppeteer/issues/3451#issuecomment-523961368
-      # and https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#setting-up-chrome-linux-sandbox
-      - run: tar -p -cv * | sudo docker run --cap-add=SYS_ADMIN -e "GITHUB_RUN_NUMBER=${GITHUB_RUN_NUMBER}" -e "GITHUB_ACTOR=${GITHUB_ACTOR}" -e "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}" -e "GH_TOKEN=${GH_TOKEN}" -i devosoft/empirical:latest /bin/bash -c "set -x && mkdir /opt/work && tar -px -C /opt/work && cd /opt/work && git config --global user.email 'octocat@github.com' && git config --global user.name 'GitHub Actions' && make test && chmod +x /opt/work/ci/after-success.sh && /opt/work/ci/after-success.sh"
+      - run: |
+          # setup
+          python3 -m pip install -r requirements.txt
+          git config --global user.name 'actions'
+          git config --global user.email 'actions-user@users.noreply.github.com'
+
+          # make cookie
+          mkdir -p ../cut-cookie/
+          cookiecutter . --no-input -o ../cut-cookie/
+          cd ../cut-cookie/cut-dishtiny-project
+
+          # deploy cookie
+          git remote set-url origin "https://${PERSONAL_ACCESS_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git checkout -b cut-cookie
+          git push origin cut-cookie --force

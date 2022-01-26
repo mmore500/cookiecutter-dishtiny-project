@@ -5,16 +5,16 @@ The sources for {{ cookiecutter.project_name }} can be downloaded from the [Gith
 You can either clone the public repository:
 
 ```bash
-
-    $ git clone git://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}
+git clone git://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}.git
 ```
 Or download the [tarball](https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/tarball/master):
 
 ```bash
-    $ curl  -OL https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/tarball/master
+curl  -OL https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/tarball/master
 ```
 
 ## Docker Container
 
-This project has a [containerized build enviroment](https://docs.docker.com/engine/reference/commandline/build/) available with all its dependencies installed. Either build a copy of the container locally from the project's `Dockerfile`,
-or get a copy of the container from [DockerHub](https://hub.docker.com/r/{{ cookiecutter.docker_username }}/{{ cookiecutter.project_slug }}}).
+This project has a [containerized build enviroment](https://docs.docker.com/engine/reference/commandline/build/) available with all its dependencies installed.
+Either build a copy of the container locally from the project's `Dockerfile`,
+or get a copy of the container from [GitHub Container Registry](https://ghcr.io/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}}).

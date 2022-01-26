@@ -1,14 +1,12 @@
 {
   "full_name": "Matthew Andres Moreno",
   "email": "m.more500@gmail.com",
-  "github_username": "devosoft",
-  "project_name": "Cut Empirical Project",
+  "github_username": "mmore500",
+  "project_name": "Cut DISHTINY Project",
   "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
-  "project_short_description": "An instantiation of the Cookiecutter Empirical Project.",
+  "project_short_description": "An instantiation of the Cookiecutter DISHTINY Project.",
   "version": "0.1.0",
   "open_source_license": ["MIT license", "BSD license", "ISC license", "Apache Software License 2.0", "GNU General Public License v3", "Not open source"],
-  "emp_dir": "third-party/Empirical/include",
   "deployment_branch": "master",
-  "landing_page": ["Yes", "No"],
-  "docker_username": "{{ cookiecutter.github_username }}"
+  "_copy_without_render": ["tex/lib/*.tex"]
 }

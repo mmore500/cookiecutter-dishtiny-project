@@ -19,9 +19,9 @@
 # absolute, like shown here.
 #
 import os
-import sys
-import subprocess
 import sphinx_rtd_theme
+import subprocess
+import sys
 
 # -- General configuration ---------------------------------------------
 
@@ -61,7 +61,7 @@ exhale_args = {
     # TIP: if using the sphinx-bootstrap-theme, you need
     # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin":    "INPUT = ../include"
+    "exhaleDoxygenStdin":    "INPUT = ../cpp/include"
 }
 
 # Add any paths that contain templates here, relative to this directory.
