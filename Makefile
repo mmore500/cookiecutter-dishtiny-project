@@ -1,8 +1,8 @@
 docs/_build/doc-coverage.json:
-	cd docs && make coverage
+	make coverage -C docs
 
 documentation-coverage-badge.json: docs/_build/doc-coverage.json
-	python3 ci/parse_documentation_coverage.py docs/_build/doc-coverage.json > web/documentation-coverage-badge.json
+	python3 ci/parse_documentation_coverage.py docs/_build/doc-coverage.json > cpp/web/documentation-coverage-badge.json
 
 version-badge.json:
 	python3 ci/parse_version.py .bumpversion.cfg > cpp/web/version-badge.json
