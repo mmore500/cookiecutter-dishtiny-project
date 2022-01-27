@@ -1,6 +1,6 @@
 # get the basename of the containing directory
 # this will be used to name othe output document
-BUILD_DIR := $(shell basename $(abspath $(dir $(lastword $(MAKEFILE_LIST)))))
+BUILD_DIR := $(shell basename $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..))
 
 all: ${BUILD_DIR}-draft.pdf
 
