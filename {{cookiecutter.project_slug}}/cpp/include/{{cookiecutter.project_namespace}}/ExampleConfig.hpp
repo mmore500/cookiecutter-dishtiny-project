@@ -1,10 +1,10 @@
 #pragma once
-#ifndef {{ cookiecutter.project_slug.replace('-','_').upper() }}_EXAMPLECONFIG_HPP_INCLUDE
-#define {{ cookiecutter.project_slug.replace('-','_').upper() }}_EXAMPLECONFIG_HPP_INCLUDE
+#ifndef {{ cookiecutter.project_namespace.upper() }}_EXAMPLECONFIG_HPP_INCLUDE
+#define {{ cookiecutter.project_namespace.upper() }}_EXAMPLECONFIG_HPP_INCLUDE
 
 #include "Empirical/include/emp/config/config.hpp"
 
-namespace {{ cookiecutter.project_slug.replace('-','_') }} {
+namespace {{ cookiecutter.project_namespace }} {
 
   EMP_BUILD_CONFIG(Config,
     GROUP(GLOBAL_SETTINGS, "Global settings"),
@@ -16,6 +16,7 @@ namespace {{ cookiecutter.project_slug.replace('-','_') }} {
     VALUE(HOLD_MAYO, bool, true, "Whether or not to hold the mayo"),
     VALUE(SUPER_SECRET, bool, true, "It's a hidden switch"),
   );
-}
 
-#endif // #ifndef {{ cookiecutter.project_slug.replace('-','_').upper() }}_EXAMPLECONFIG_HPP_INCLUDE
+} // namespace {{cookiecutter.project_namespace}} {
+
+#endif // #ifndef {{ cookiecutter.project_namespace.upper() }}_EXAMPLECONFIG_HPP_INCLUDE

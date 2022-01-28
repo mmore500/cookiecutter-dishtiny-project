@@ -7,15 +7,15 @@
 #include "Empirical/include/emp/prefab/ConfigPanel.hpp"
 #include "Empirical/include/emp/web/web.hpp"
 
-#include "{{cookiecutter.project_slug}}/config_setup.hpp"
-#include "{{cookiecutter.project_slug}}/ExampleConfig.hpp"
-#include "{{cookiecutter.project_slug}}/example.hpp"
+#include "{{cookiecutter.project_namespace}}/config_setup.hpp"
+#include "{{cookiecutter.project_namespace}}/ExampleConfig.hpp"
+#include "{{cookiecutter.project_namespace}}/example.hpp"
 
 namespace UI = emp::web;
 
 UI::Document doc("emp_base");
 
-{{ cookiecutter.project_slug.replace('-','_') }}::Config cfg;
+{{ cookiecutter.project_namespace }}::Config cfg;
 
 int main() {
   doc << "<h1>Hello, browser!</h1>";
@@ -28,5 +28,5 @@ int main() {
 
   std::cout << "Hello, console!" << "\n";
 
-  return example();
+  return {{cookiecutter.project_namespace}}::example();
 }

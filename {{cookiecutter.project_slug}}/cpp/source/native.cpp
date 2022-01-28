@@ -6,13 +6,13 @@
 
 #include "Empirical/include/emp/base/vector.hpp"
 
-#include "{{cookiecutter.project_slug}}/config_setup.hpp"
-#include "{{cookiecutter.project_slug}}/ExampleConfig.hpp"
-#include "{{cookiecutter.project_slug}}/example.hpp"
+#include "{{cookiecutter.project_namespace}}/config_setup.hpp"
+#include "{{cookiecutter.project_namespace}}/ExampleConfig.hpp"
+#include "{{cookiecutter.project_namespace}}/example.hpp"
 
 // This is the main function for the NATIVE version of {{cookiecutter.project_name}}.
 
-{{ cookiecutter.project_slug.replace('-','_') }}::Config cfg;
+{{ cookiecutter.project_namespace }}::Config cfg;
 
 int main(int argc, char* argv[]) {
   // Set up a configuration panel for native application
@@ -21,5 +21,5 @@ int main(int argc, char* argv[]) {
 
   std::cout << "Hello, world!" << "\n";
 
-  return example();
+  return {{ cookiecutter.project_namespace }}::example();
 }

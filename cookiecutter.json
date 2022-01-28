@@ -4,6 +4,7 @@
   "github_username": "mmore500",
   "project_name": "Cut DISHTINY Project",
   "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
+  "project_namespace": "{{ cookiecutter.project_slug.replace('-','_') }}",
   "project_short_description": "An instantiation of the Cookiecutter DISHTINY Project.",
   "version": "0.1.0",
   "open_source_license": ["MIT license", "BSD license", "ISC license", "Apache Software License 2.0", "GNU General Public License v3", "Not open source"],
