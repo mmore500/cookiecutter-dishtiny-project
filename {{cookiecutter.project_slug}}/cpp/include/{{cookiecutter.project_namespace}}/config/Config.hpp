@@ -1,6 +1,6 @@
 #pragma once
-#ifndef {{ cookiecutter.project_namespace.upper() }}_EXAMPLECONFIG_HPP_INCLUDE
-#define {{ cookiecutter.project_namespace.upper() }}_EXAMPLECONFIG_HPP_INCLUDE
+#ifndef {{ cookiecutter.project_namespace.upper() }}_CONFIG_CONFIG_HPP_INCLUDE
+#define {{ cookiecutter.project_namespace.upper() }}_CONFIG_CONFIG_HPP_INCLUDE
 
 #include "Empirical/include/emp/config/config.hpp"
 
@@ -19,4 +19,4 @@ namespace {{ cookiecutter.project_namespace }} {
 
 } // namespace {{cookiecutter.project_namespace}} {
 
-#endif // #ifndef {{ cookiecutter.project_namespace.upper() }}_EXAMPLECONFIG_HPP_INCLUDE
+#endif // #ifndef {{ cookiecutter.project_namespace.upper() }}_CONFIG_CONFIG_HPP_INCLUDE

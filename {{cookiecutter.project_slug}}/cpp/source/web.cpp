@@ -3,8 +3,8 @@
 #include "Empirical/include/emp/prefab/ConfigPanel.hpp"
 #include "Empirical/include/emp/web/web.hpp"
 
-#include "{{cookiecutter.project_namespace}}/Config.hpp"
-#include "{{cookiecutter.project_namespace}}/config_setup.hpp"
+#include "{{cookiecutter.project_namespace}}/config/Config.hpp"
+#include "{{cookiecutter.project_namespace}}/config/setup_config_web.hpp"
 #include "{{cookiecutter.project_namespace}}/example.hpp"
 
 emp::web::Document doc("emp_base");
