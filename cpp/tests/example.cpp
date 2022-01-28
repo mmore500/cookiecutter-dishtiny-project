@@ -2,9 +2,8 @@
 
 #include "Catch/single_include/catch2/catch.hpp"
 
-#include "cut-dishtiny-project/example.hpp"
+#include "cut_dishtiny_project/example.hpp"
 
-TEST_CASE("Test example")
-{
-  REQUIRE( example() );
+TEST_CASE("Test example") {
+  REQUIRE( cut_dishtiny_project::example() );
 }

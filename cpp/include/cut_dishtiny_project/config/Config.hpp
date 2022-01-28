@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CUT_DISHTINY_PROJECT_EXAMPLECONFIG_HPP_INCLUDE
-#define CUT_DISHTINY_PROJECT_EXAMPLECONFIG_HPP_INCLUDE
+#ifndef CUT_DISHTINY_PROJECT_CONFIG_CONFIG_HPP_INCLUDE
+#define CUT_DISHTINY_PROJECT_CONFIG_CONFIG_HPP_INCLUDE
 
 #include "Empirical/include/emp/config/config.hpp"
 
@@ -16,6 +16,7 @@ namespace cut_dishtiny_project {
     VALUE(HOLD_MAYO, bool, true, "Whether or not to hold the mayo"),
     VALUE(SUPER_SECRET, bool, true, "It's a hidden switch"),
   );
-}
 
-#endif // #ifndef CUT_DISHTINY_PROJECT_EXAMPLECONFIG_HPP_INCLUDE
+} // namespace cut_dishtiny_project {
+
+#endif // #ifndef CUT_DISHTINY_PROJECT_CONFIG_CONFIG_HPP_INCLUDE

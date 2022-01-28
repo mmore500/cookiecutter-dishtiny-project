@@ -1,20 +1,13 @@
-//  This file is part of Cut DISHTINY Project
-//  Copyright (C) Matthew Andres Moreno, 2022.
-//  Released under MIT license; see LICENSE
-
 #include <iostream>
 
 #include "Empirical/include/emp/prefab/ConfigPanel.hpp"
-#include "Empirical/include/emp/web/TextArea.hpp"
 #include "Empirical/include/emp/web/web.hpp"
 
-#include "cut-dishtiny-project/config_setup.hpp"
-#include "cut-dishtiny-project/ExampleConfig.hpp"
-#include "cut-dishtiny-project/example.hpp"
+#include "cut_dishtiny_project/config/Config.hpp"
+#include "cut_dishtiny_project/config/setup_config_web.hpp"
+#include "cut_dishtiny_project/example.hpp"
 
-namespace UI = emp::web;
-
-UI::Document doc("emp_base");
+emp::web::Document doc("emp_base");
 
 cut_dishtiny_project::Config cfg;
 
@@ -25,23 +18,9 @@ int main() {
   setup_config_web(cfg);
   cfg.Write(std::cout);
   emp::prefab::ConfigPanel example_config_panel(cfg);
-  example_config_panel.ExcludeSetting("SUPER_SECRET");
-  example_config_panel.SetRange("SEED", "-1", "100", "1");
   doc << example_config_panel;
 
-  // An example to show how the Config Panel could be used
-  // to control the color of text in an HTML text area
-  UI::TextArea example_area("example_area");
-  example_area.SetSize(cfg.SIZE(), cfg.SIZE());
-  example_config_panel.SetOnChangeFun([](const std::string & setting, const std::string & value){
-    UI::TextArea example_area = doc.TextArea("example_area");
-    example_area.SetCSS("color", cfg.COLOR());
-    example_area.Redraw();
-  });
+  std::cout << "Hello, console!" << '\n';
 
-  doc << example_area;
-
-  std::cout << "Hello, console!" << "\n";
-
-  return example();
+  return cut_dishtiny_project::example();
 }

@@ -4,9 +4,13 @@
 
 #include <iostream>
 
+namespace cut_dishtiny_project {
+
 bool example() {
-  std::cout << "example thing!" << "\n";
+  std::cout << "example thing!" << '\n';
   return true;
 }
+
+} // namespace cut_dishtiny_project
 
 #endif // #ifndef CUT_DISHTINY_PROJECT_EXAMPLE_HPP_INCLUDE

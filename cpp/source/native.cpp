@@ -1,14 +1,10 @@
-//  This file is part of Cut DISHTINY Project
-//  Copyright (C) Matthew Andres Moreno, 2022.
-//  Released under MIT license; see LICENSE
-
 #include <iostream>
 
 #include "Empirical/include/emp/base/vector.hpp"
 
-#include "cut-dishtiny-project/config_setup.hpp"
-#include "cut-dishtiny-project/ExampleConfig.hpp"
-#include "cut-dishtiny-project/example.hpp"
+#include "cut_dishtiny_project/config/Config.hpp"
+#include "cut_dishtiny_project/config/setup_config_native.hpp"
+#include "cut_dishtiny_project/example.hpp"
 
 // This is the main function for the NATIVE version of Cut DISHTINY Project.
 
@@ -21,5 +17,5 @@ int main(int argc, char* argv[]) {
 
   std::cout << "Hello, world!" << "\n";
 
-  return example();
+  return cut_dishtiny_project::example();
 }
