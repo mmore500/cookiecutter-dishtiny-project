@@ -3,8 +3,8 @@
 #define CUT_DISHTINY_PROJECT_CONFIG_TRY_READ_CONFIG_FILE_HPP_INCLUDE
 
 #include <cstdlib>
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
 #include "Config.hpp"
 
