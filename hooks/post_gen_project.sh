@@ -19,6 +19,7 @@ ln -s ../requirements.txt binder/requirements.txt
 ln -s ../pylib binder/pylib
 ln -s ../../pylib binder/example/pylib
 
+mkdir -p docs/docs
 ln -s ../assets docs/docs/assets
 
 git add .
