@@ -33,7 +33,7 @@ web-debug: debug-web
 
 # see https://stackoverflow.com/a/57760267 RE: -lstdc++fs
 $(PROJECT): source/native.cpp include/
-	$(CXX) $(CFLAGS_nat) source/native.cpp -o $(PROJECT) -lstdc++fs
+	$(CXX) $(CFLAGS_nat) source/native.cpp -o $(PROJECT) -lstdc++fs -lmetis -lz -lcurl -lsfml-graphics -ldw -llzma
 	@echo To build the web version use: make web
 
 $(PROJECT).js: source/web.cpp include/
