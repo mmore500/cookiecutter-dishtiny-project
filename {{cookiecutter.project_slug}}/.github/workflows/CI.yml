@@ -240,7 +240,7 @@ jobs:
         with:
           submodules: 'recursive'
           fetch-depth: 0 # fetch all history for all branches and tags
-      - name: Push to DockerHub
+      - name: Push to GitHub Container Registry
         uses: docker/build-push-action@v1
         with:
           push: true
