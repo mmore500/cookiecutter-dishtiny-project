@@ -4,7 +4,6 @@
 
 #include "{{cookiecutter.project_namespace}}/example.hpp"
 
-TEST_CASE("Test example")
-{
+TEST_CASE("Test example") {
   REQUIRE( {{cookiecutter.project_namespace}}::example() );
 }

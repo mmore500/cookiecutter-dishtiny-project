@@ -9,13 +9,13 @@
 #include "Empirical/include/emp/web/UrlParams.hpp"
 #include "Empirical/include/emp/web/web.hpp"
 
-#include "{{cookiecutter.project_namespace}}/ExampleConfig.hpp"
+#include "{{cookiecutter.project_namespace}}/Config.hpp"
 
 namespace {{cookiecutter.project_namespace}} {
 
 void use_existing_config_file({{ cookiecutter.project_namespace }}::Config & config, emp::ArgManager & am) {
   if(std::filesystem::exists("{{cookiecutter.project_namespace}}.cfg")) {
-    std::cout << "Configuration read from {{cookiecutter.project_namespace}}.cfg" << "\n";
+    std::cout << "Configuration read from {{cookiecutter.project_namespace}}.cfg" << '\n';
     config.Read("{{cookiecutter.project_namespace}}.cfg");
   }
   am.UseCallbacks();
