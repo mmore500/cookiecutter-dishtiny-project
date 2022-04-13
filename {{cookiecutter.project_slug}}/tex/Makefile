@@ -57,7 +57,7 @@ clean:
 sview:
 	xdg-open ${BUILD_DIR}-draft.pdf 2>/dev/null
 
-cleaner:
+cleaner: clean
 	latexmk -CA
 	# remove auxillary files, excepting .tex and .bib files
 	find . -type f -name ${BUILD_DIR}"*" ! -name '*.tex' ! -name '*.bib' -delete
