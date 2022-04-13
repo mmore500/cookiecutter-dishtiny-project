@@ -36,6 +36,8 @@ RUN \
     make \
     moreutils \
     nodejs \
+    pcregrep \
+    pdftk \
     && \
   rm -rf /var/lib/apt/lists/*
 
