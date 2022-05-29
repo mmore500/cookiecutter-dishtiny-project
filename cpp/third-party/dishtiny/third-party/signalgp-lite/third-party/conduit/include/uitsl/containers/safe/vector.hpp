@@ -19,6 +19,9 @@ class vector {
   impl_t impl;
 
 public:
+
+  std::shared_mutex& GetMutex() const { return mutex; }
+
   // types
   using value_type = typename impl_t::value_type;
   using allocator_type = typename impl_t::allocator_type;
@@ -267,7 +270,7 @@ public:
   ) {
     const std::unique_lock lock{ mutex };
     return impl.insert(position, first, last);
- }
+  }
 
   iterator insert(
     const_iterator position,

@@ -1,30 +1,27 @@
 #!/usr/bin/python3
 
+from iterpop import iterpop as ip
+import itertools as it
+from keyname import keyname as kn
+from matplotlib.offsetbox import AnchoredText
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from scipy.stats import stats
+import seaborn as sns
+from slugify import slugify
+import statsmodels.formula.api as smf
 import sys
 
-import pandas as pd
-import statsmodels.formula.api as smf
-from scipy.stats import stats
-
-import matplotlib.pyplot as plt
-from matplotlib.offsetbox import AnchoredText
-import seaborn as sns
-
-import itertools as it
-import numpy as np
-from slugify import slugify
-from keyname import keyname as kn
-from iterpop import iterpop as ip
+try:
+  __, synchronous = sys.argv
+except:
+  raise ValueError('specify "synchronous" as argument')
 
 try:
-    __, synchronous = sys.argv
+  synchronous = int(synchronous)
 except:
-    raise ValueError('specify "synchronous" as argument')
-
-try:
-    synchronous = int(synchronous)
-except:
-    raise ValueError('"synchronous" should be an integer')
+  raise ValueError('"synchronous" should be an integer')
 
 assert synchronous in (0, 1), '"synchronous" should be 0 or 1'
 
@@ -45,19 +42,19 @@ def estimate_latency(group):
   }
 
   for spec, val in (
-        (
-            {
-              'statistic' : statistic,
-              'name' : decoder[parameter],
-            },
-            getter(parameter)
-        ) for parameter in model.params.keys()
-        for statistic, getter in (
-          ('Estimated', lambda param: model.params[parameter]),
-          ('Lower Bound', lambda param: model.conf_int()[0][param]),
-          ('Upper Bound', lambda param: model.conf_int()[1][param]),
-         )
-    ):
+    (
+      {
+        'statistic' : statistic,
+        'name' : decoder[parameter],
+      },
+      getter(parameter)
+    ) for parameter in model.params.keys()
+    for statistic, getter in (
+      ('Estimated', lambda param: model.params[parameter]),
+      ('Lower Bound', lambda param: model.conf_int()[0][param]),
+      ('Upper Bound', lambda param: model.conf_int()[1][param]),
+    )
+  ):
     group['{statistic} {name}'.format(**spec)] = val
 
   return group
@@ -165,8 +162,8 @@ def estimate_properties(model):
   #   Parameter2 : [val3, val4]
   # }
   conf_ints = {
-      col : list(bounds)
-      for col, bounds in model.conf_int().iterrows()
+    col : list(bounds)
+    for col, bounds in model.conf_int().iterrows()
   }
 
   # take the product of dicts

@@ -15,7 +15,7 @@
 
 #include "../../../../../../uitsl/debug/WarnOnce.hpp"
 #include "../../../../../../uitsl/meta/s::static_test.hpp"
-#include "../../../../../../uitsl/mpi/mpi_utils.hpp"
+#include "../../../../../../uitsl/mpi/mpi_init_utils.hpp"
 #include "../../../../../../uitsl/mpi/Request.hpp"
 #include "../../../../../../uitsl/nonce/CircularIndex.hpp"
 #include "../../../../../../uitsl/utility/print_utils.hpp"
@@ -141,7 +141,7 @@ public:
     const uit::InterProcAddress& address_,
     std::shared_ptr<BackEndImpl> back_end,
     const uit::RuntimeSizeBackEnd<ImplSpec>& rts
-     =uit::RuntimeSizeBackEnd<ImplSpec>{}
+      =uit::RuntimeSizeBackEnd<ImplSpec>{}
   ) : address(address_)
   , runtime_size( rts.HasSize() ? rts.GetSize() : back_end->GetSize() ) {
 

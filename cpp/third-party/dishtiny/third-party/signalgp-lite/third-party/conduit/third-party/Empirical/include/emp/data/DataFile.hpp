@@ -13,6 +13,7 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "../base/assert.hpp"
@@ -136,7 +137,7 @@ namespace emp {
     /// Print a header containing comments describing all of the columns
     virtual void PrintHeaderComment(const std::string & cstart = "# ") {
       for (size_t i = 0; i < keys.size(); i++) {
-        *os << cstart << i << ": " << descs[i] << " (" << keys[i] << ")" << '\n';
+        *os << cstart << i << ": " << descs[i] << " (" << keys[i] << ")" << std::endl;
       }
       os->flush();
     }
@@ -187,6 +188,16 @@ namespace emp {
     size_t AddFun(const std::function<T()> & fun, const std::string & key="", const std::string & desc="") {
       std::function<fun_t> in_fun = [fun](std::ostream & os){ os << fun(); };
       return Add(in_fun, key, desc);
+    }
+
+    /// Add a function that returns a value to be printed to the file.
+    /// @param getter function to call to get the value to print
+    /// @param key Keyword associated with this column (gets used as a column name for this data)
+    /// @param desc Full description of this data (used by \c PrintHeaderComment)
+    /// @note conveneince interface to std::funciton AddFun
+    template <typename Getter>
+    size_t AddFun(Getter getter, const std::string & key="", const std::string & desc="") {
+      return AddFun(std::function{getter}, key, desc);
     }
 
     /// Add a function that always prints the current value of \c var.
@@ -533,8 +544,9 @@ namespace emp {
     struct update_impl {
       void Update(ContainerDataFile<container_t> * df) {
         using data_t = typename container_t::value_type;
+
         for (const data_t & d : df->GetCurrentRows()) {
-          df->OutputLine(d);
+          df->FilterThenOutputLine(d);
         }
       }
     };
@@ -545,7 +557,7 @@ namespace emp {
         using data_t = typename remove_ptr_type<container_t>::type::value_type;
 
         for (const data_t & d : *(df->GetCurrentRows())) {
-          df->OutputLine(d);
+          df->FilterThenOutputLine(d);
         }
       }
     };
@@ -556,7 +568,7 @@ namespace emp {
         using data_t = typename remove_ptr_type<container_t>::type::value_type;
 
         for (const data_t & d : *(df->GetCurrentRows())) {
-          df->OutputLine(d);
+          df->FilterThenOutputLine(d);
         }
       }
     };
@@ -580,8 +592,14 @@ namespace emp {
     using data_t = typename raw_container_t::value_type;
     using container_fun_t = void(std::ostream &, data_t);
     using fun_update_container_t = std::function<container_t(void)>;
+    using fun_filter_container_t = std::function<bool(const data_t&)>;
+    using fun_lock_container_t = std::function<std::shared_ptr<void>(const container_t&)>;
 
     fun_update_container_t update_container_fun;
+    fun_filter_container_t filter_container_fun
+      = [](const data_t&){ return true; };
+    fun_lock_container_t lock_container_fun
+      = [](const container_t&){ return std::shared_ptr<void>{}; };
 
     container_t current_rows;
     FunctionSet<container_fun_t> container_funs;
@@ -599,6 +617,26 @@ namespace emp {
     /// container that data is being calculated on.
     void SetUpdateContainerFun(const fun_update_container_t fun) {
       update_container_fun = fun;
+    }
+
+    /// Tell this file what function to run to decide if a container entry
+    /// should be included in the data recorded.
+    void SetFilterContainerFun(const fun_filter_container_t fun) {
+      filter_container_fun = fun;
+    }
+
+    /// Tell this file what function to run to lock the container
+    /// before iterating through.
+    void SetLockContainerFun(const fun_lock_container_t fun) {
+      lock_container_fun = fun;
+    }
+
+    /// Tell this file what function to run to lock the container
+    /// before iterating through.
+    /// @Note convenience overload.
+    template<typename LockMaker>
+    void SetLockContainerFun(LockMaker lock_maker) {
+      SetLockContainerFun( fun_lock_container_t{ lock_maker } );
     }
 
     /// Print a header containing the name of each column
@@ -619,10 +657,10 @@ namespace emp {
     /// Print a header containing comments describing all of the columns
     void PrintHeaderComment(const std::string & cstart = "# ") override {
       for (size_t i = 0; i < keys.size(); i++) {
-        *os << cstart << i << ": " << descs[i] << " (" << keys[i] << ")" << '\n';
+        *os << cstart << i << ": " << descs[i] << " (" << keys[i] << ")" << std::endl;
       }
       for (size_t i = 0; i < container_keys.size(); i++) {
-        *os << cstart << i+keys.size() << ": " << container_descs[i] << " (" << container_keys[i] << ")" << '\n';
+        *os << cstart << i+keys.size() << ": " << container_descs[i] << " (" << container_keys[i] << ")" << std::endl;
       }
 
       os->flush();
@@ -630,7 +668,11 @@ namespace emp {
 
     const container_t GetCurrentRows() const { return current_rows; }
 
-    void OutputLine(const data_t d) {
+    void FilterThenOutputLine(const data_t& d) {
+      if ( filter_container_fun(d) ) OutputLine(d);
+    }
+
+    void OutputLine(const data_t& d) {
       *os << line_begin;
         for (size_t i = 0; i < funs.size(); i++) {
           if (i > 0) *os << line_spacer;
@@ -647,7 +689,9 @@ namespace emp {
     /// Run all of the functions and print the results as a new line in the file
     void Update() override {
       emp_assert(update_container_fun);
+      emp_assert(lock_container_fun);
       current_rows = update_container_fun();
+      const auto lock{ lock_container_fun(current_rows) };
       internal::update_impl<container_t>().Update(this);
       os->flush();
     }
@@ -660,7 +704,7 @@ namespace emp {
     /// If a function takes an ostream, pass in the correct one.
     /// Generic function for adding a column to the DataFile. In practice, you probably
     /// want to call one of the more specific ones.
-    size_t Add(const std::function<void(std::ostream &, data_t)> & fun, const std::string & key, const std::string & desc) {
+    size_t Add(const std::function<void(std::ostream &, const data_t&)> & fun, const std::string & key, const std::string & desc) {
       size_t id = container_funs.GetSize();
       container_funs.Add(fun);
       container_keys.emplace_back(key);
@@ -670,9 +714,19 @@ namespace emp {
 
     /// Add a function that returns a value to be printed to the file.
     template <typename T>
-    size_t AddContainerFun(const std::function<T(const data_t)> & fun, const std::string & key="", const std::string & desc="") {
-      std::function<container_fun_t> in_fun = [fun](std::ostream & os, const data_t data){ os << fun(data); };
+    size_t AddContainerFun(const std::function<T(const data_t&)> & fun, const std::string & key="", const std::string & desc="") {
+      std::function<container_fun_t> in_fun = [fun](std::ostream & os, const data_t& data){ os << fun(data); };
       return Add(in_fun, key, desc);
+    }
+
+    /// Add a function that returns a value to be printed to the file.
+    /// @note Convenience overload
+    template <typename Getter>
+    size_t AddContainerFun(Getter getter, const std::string & key="", const std::string & desc="") {
+      using ret_t = decltype(getter(std::declval<data_t>()));
+      return AddContainerFun(
+        std::function<ret_t(const data_t&)>{ getter }, key, desc
+      );
     }
 
 

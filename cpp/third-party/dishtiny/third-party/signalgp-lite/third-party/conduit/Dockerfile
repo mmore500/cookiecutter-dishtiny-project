@@ -43,6 +43,7 @@ RUN \
     && \
   echo "removed -backports, -updates, -proposed, -security repositories"
 
+# adapted in part form https://www.cloudsavvyit.com/13461/how-to-run-puppeteer-and-headless-chrome-in-a-docker-container/
 RUN \
   apt-get update -qq \
     && \
@@ -72,10 +73,13 @@ RUN \
     libdbus-1-3 \
     libexpat1 \
     libfontconfig1 \
+    libgbm-dev \
     libgconf-2-4 \
     libgdk-pixbuf2.0-0 \
     libglib2.0-0 \
     libgtk-3-0 \
+    libicu-dev \
+    libjpeg-dev \
     libhdf5-100 \
     libhdf5-cpp-100 \
     libhdf5-dev \
@@ -94,6 +98,7 @@ RUN \
     libopenmpi2 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
+    libpng-dev \
     libpthread-stubs0-dev \
     libstdc++-7-dev \
     libstdc++6=8-20180414-1ubuntu2 \
@@ -110,6 +115,7 @@ RUN \
     libxrender1 \
     libxss1 \
     libxtst6 \
+    locales \
     lsb-release \
     man \
     mpich \
@@ -136,6 +142,7 @@ RUN \
     python3-sphinx \
     python3-virtualenv \
     python3-wheel \
+    rename \
     rsync \
     slurm-client \
     software-properties-common \
@@ -193,7 +200,7 @@ RUN \
     llvm-7=1:7.1.0~svn353565-1~exp1~20190408084827.60 \
     llvm-7-dev=1:7.1.0~svn353565-1~exp1~20190408084827.60 \
     clang-7=1:7.1.0~svn353565-1~exp1~20190408084827.60 \
-    g++-9=9.3.0-11ubuntu0~18.04.1 \
+    g++-9=9.4.0-1ubuntu1~18.04 \
     && \
   apt-get clean \
     && \
@@ -205,9 +212,11 @@ RUN \
 RUN echo 'kernel.unprivileged_userns_clone=1' > /etc/sysctl.d/userns.conf
 
 RUN \
-  pip3 install  --timeout 60 --retries 100 -r /opt/conduit/third-party/requirements.txt \
+  python3 -m pip install --timeout 60 --retries 100 --upgrade pip==21.3.1 \
     && \
-  pip3 install  --timeout 60 --retries 100 -r /opt/conduit/docs/requirements.txt \
+  python3 -m pip install --timeout 60 --retries 100 --ignore-installed -r /opt/conduit/third-party/requirements.txt \
+    && \
+  python3 -m pip install --timeout 60 --retries 100 --ignore-installed -r /opt/conduit/docs/requirements.txt \
     && \
   echo "installed Python packages"
 
@@ -243,6 +252,13 @@ RUN \
   ./install_dependencies.sh \
     && \
   echo "installed third party dependencies"
+
+# set up locale
+# adapted from https://stackoverflow.com/a/55077451
+RUN \
+  locale-gen en_US.UTF-8 \
+    && \
+  echo "generated en_US.UTF-8 locale"
 
 # Set enviroment variables
 # Use mimalloc override within the container.
@@ -287,5 +303,17 @@ RUN \
   echo "/context/ /__w/ directories set up, user granted permissions"
 
 USER user
+
+# must be installed as user for executable to be available on PATH
+RUN \
+  pip3 install --timeout 60 --retries 100 editorconfig-checker==2.3.54 \
+    && \
+  ln -s /home/user/.local/bin/ec /home/user/.local/bin/editorconfig-checker \
+    && \
+  echo "installed editorconfig-checker"
+
+# adapted from https://askubuntu.com/a/799306
+# and https://stackoverflow.com/a/38905161
+ENV PATH "/home/user/.local/bin:$PATH"
 
 CMD ["bash"]

@@ -45,6 +45,7 @@ int test_fun() {
   return val += 3;
 }
 
+<<<<<<< HEAD
 TEST_CASE("Test DataFile", "[data]") {
      int test_int = 5;
 
@@ -100,8 +101,8 @@ TEST_CASE("Test Container DataFile", "[data]") {
 
     dfile.SetUpdateContainerFun(get_data);
 
-    std::function<int(int)> return_val = [](int i){return i;};
-    std::function<int(int)> square_val = [](int i){return i*i;};
+    std::function<int(const int&)> return_val = [](const int& i){return i;};
+    std::function<int(const int&)> square_val = [](const int& i){return i*i;};
 
     dfile.AddContainerFun(return_val, "value", "value");
     dfile.AddContainerFun(square_val, "squared", "value squared");
