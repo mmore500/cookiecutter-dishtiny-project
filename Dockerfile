@@ -20,7 +20,6 @@ RUN \
     && \
   apt-get install -qy --no-install-recommends \
     gawk \
-    ghostscript \
     && \
   rm -rf /var/lib/apt/lists/*
 
