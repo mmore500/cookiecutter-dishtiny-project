@@ -78,7 +78,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Cut DISHTINY Project'
-copyright = u"2022, Matthew Andres Moreno"
+copyright = u"2023, Matthew Andres Moreno"
 author = u"Matthew Andres Moreno"
 
 # The version info for the project you're documenting, acts as replacement
