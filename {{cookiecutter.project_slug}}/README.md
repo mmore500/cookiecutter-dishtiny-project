@@ -17,16 +17,23 @@ Check out the live in-browser web app at <https://{{ cookiecutter.github_usernam
 
 {% if is_open_source %}
 -   Free software: {{ cookiecutter.open_source_license }}
--   Documentation: <https://{{ cookiecutter.project_slug | replace("_", "-") }}.readthedocs.io>.{% endif %}
+<!---
+-   Documentation: <https://{{ cookiecutter.project_slug | replace("_", "-") }}.readthedocs.io>.
+-->
+{% endif %}
 
+<!---
 ## Features
 
 -   TODO
 
 ![cookie monster example](docs/assets/cookie.gif)
+-->
 
 ## Credits
 
 This package was created with [Cookiecutter][https://github.com/audreyr/cookiecutter] and the [mmore500/cookiecutter-dishtiny-project][https://github.com/mmore500/cookiecutter-dishtiny-project] project template.
 
+<!---
 This package uses [Empirical](https://github.com/devosoft/Empirical#readme), a library of tools for scientific software development, with emphasis on also being able to build web interfaces using Emscripten.
+-->
